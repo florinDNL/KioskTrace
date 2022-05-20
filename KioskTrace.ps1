@@ -35,7 +35,7 @@ Function CreateLogFolder
     if (-Not(Test-Path $LogPath))
     {
     
-        New-Item -Path [Environment]::GetFolderPath("Desktop") -Name "KioskLogs" -ItemType "Directory" | Out-Null
+        New-Item -Path ([Environment]::GetFolderPath("Desktop")) -Name "KioskLogs" -ItemType "Directory" | Out-Null
         Write-Host "`nCreated folder " $LogPath -ForegroundColor DarkCyan
 
     }
