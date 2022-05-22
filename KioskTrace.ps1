@@ -14,12 +14,12 @@ $AssignedAccessProviders = @(
 
 $RegistryKeys = @{
 
-    "HKLM:SOFTWARE\Microsoft\Windows\AssignedAccessConfiguration" = "AssignedAccessConfiguration";
-    "HKLM:SOFTWARE\Microsoft\Windows\AssignedAccessCsp" = "AssignedAccessCsp";
-    "HKLM:SOFTWARE\Microsoft\Windows Embedded\Shell Launcher" = "ShellLauncher";
-    "HKLM:SOFTWARE\Microsoft\Provisioning\Diagnostics\ConfigManager\AssignedAccess" = "AssignedAccessDiag";
-    "HKLM:SOFTWARE\Microsoft\Windows\EnterpriseResourceManager\AllowedNodePaths\CSP\AssignedAccess" = "AssignedAccessCSPNodePaths";
-    "HKLM:SYSTEM\CurrentControlSet\Services\AssignedAccessManagerSvc" = "AssignedAccessManagerSvc"
+    "HKLM:SOFTWARE\Microsoft\Windows\AssignedAccessConfiguration"                                       = "AssignedAccessConfiguration";
+    "HKLM:SOFTWARE\Microsoft\Windows\AssignedAccessCsp"                                                 = "AssignedAccessCsp";
+    "HKLM:SOFTWARE\Microsoft\Windows Embedded\Shell Launcher"                                           = "ShellLauncher";
+    "HKLM:SOFTWARE\Microsoft\Provisioning\Diagnostics\ConfigManager\AssignedAccess"                     = "AssignedAccessDiag";
+    "HKLM:SOFTWARE\Microsoft\Windows\EnterpriseResourceManager\AllowedNodePaths\CSP\AssignedAccess"     = "AssignedAccessCSPNodePaths";
+    "HKLM:SYSTEM\CurrentControlSet\Services\AssignedAccessManagerSvc"                                   = "AssignedAccessManagerSvc"
 
 }
 
@@ -54,7 +54,7 @@ Function CreateLogFolder
     {
 
         Write-Host "`nFound existing folder `"$LogPath`". Clearing contents." -ForegroundColor DarkCyan
-        Get-ChildItem -Path $LogPath | ForEach { $_.Delete()}
+        Get-ChildItem -Path $LogPath | ForEach { $_.Delete() }
 
     }
 
