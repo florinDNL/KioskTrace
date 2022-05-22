@@ -1,5 +1,6 @@
 $LogPath   = [Environment]::GetFolderPath("Desktop") + "\KioskLogs"
-$IsProcMon = $FALSE
+$IsProcMon = if ($args -and ($args[0].ToString().ToLower() -Match "procmon")) {$TRUE} else {$FALSE}
+
 
 $AssignedAccessProviders = @(
 
@@ -10,23 +11,33 @@ $AssignedAccessProviders = @(
 
 )
 
-if ($args)
+
+$RegistryKeys = @{
+
+    "HKLM:SOFTWARE\Microsoft\Windows\AssignedAccessConfiguration" = "AssignedAccessConfiguration";
+    "HKLM:SOFTWARE\Microsoft\Windows\AssignedAccessCsp" = "AssignedAccessCsp";
+    "HKLM:SOFTWARE\Microsoft\Windows Embedded\Shell Launcher" = "ShellLauncher";
+    "HKLM:SOFTWARE\Microsoft\Provisioning\Diagnostics\ConfigManager\AssignedAccess" = "AssignedAccessDiag";
+    "HKLM:SOFTWARE\Microsoft\Windows\EnterpriseResourceManager\AllowedNodePaths\CSP\AssignedAccess" = "AssignedAccessCSPNodePaths";
+    "HKLM:SYSTEM\CurrentControlSet\Services\AssignedAccessManagerSvc" = "AssignedAccessManagerSvc"
+
+}
+
+
+Function ElevationCheck
 {
 
-    if ($args[0].ToString().ToLower() -eq "-procmon")
+    $currentPrincipal = New-Object Security.Principal.WindowsPrincipal([Security.Principal.WindowsIdentity]::GetCurrent())
+        
+    if (-Not($currentPrincipal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)))
     {
-
-        $IsProcMon = $TRUE
-
-    }
-    else
-    {
-
-        Write-Host "`nInvalid Parameter: " $args[0] -ForegroundColor Red
+        
+        Write-Host "Please run the script as Administrator" -ForegroundColor Red
         break
 
     }
-}
+
+}     
 
 
 Function CreateLogFolder
@@ -42,7 +53,8 @@ Function CreateLogFolder
     else
     {
 
-        Write-Host "`nFound existing folder" $LogPath -ForegroundColor DarkCyan
+        Write-Host "`nFound existing folder `"$LogPath`". Clearing contents." -ForegroundColor DarkCyan
+        Get-ChildItem -Path $LogPath | ForEach { $_.Delete()}
 
     }
 
@@ -67,6 +79,7 @@ Function StartProcMon
 
 }
 
+
 Function StopProcMon
 {
 
@@ -80,6 +93,7 @@ Function StopProcMon
     Remove-Item -Path ($LogPath + "\ProcessMonitor.zip")
 
 }
+
 
 Function StartDataCollectorSet
 {
@@ -96,6 +110,7 @@ Function StartDataCollectorSet
 
 }
 
+
 Function StopDataCollectorSet
 {
     
@@ -104,29 +119,75 @@ Function StopDataCollectorSet
 }
 
 
+Function GetSingleAppKioskConfiguration
+{
+
+    $SingleApp = Get-AssignedAccess
+
+    if ($SingleApp)
+    {
+
+        $configuration = "Single App Kiosk Configuration found for user " + $SingleApp.UserName + "`n`nUserSID = " + $SingleApp.UserSID + "`nApp: " + $SingleApp.AppName + "`nAUMID: " + $SingleApp.AppUserModelId
+        $configuration >> ($LogPath + "\SingleApp.txt")
+
+    }
+    else
+    {
+
+        "No Single App Configuration found" >> ($LogPath + "\SingleApp.txt")
+
+    }
+
+}
+
+
+Function GetRegistryKeys
+{
+
+    ForEach ($Key in $RegistryKeys.Keys)
+    {
+        
+        Get-ItemProperty -Path $Key >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
+        Get-ChildItem -Path $Key -Recurse >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
+
+    }
+
+}
+
+
 Function Main
 {
 
+    ElevationCheck
     CreateLogFolder
+
     if ($IsProcMon)
     {
+
         Write-Host "`nDownloading and starting ProcMon" -ForegroundColor Cyan
         DownloadProcMon
         StartProcMon 
         Write-Host "`nProcMon started" -ForegroundColor DarkCyan
 
     }
-    StartDataCollectorSet
-    Write-Host "`nTrace started" -ForegroundColor Green
 
-    Read-Host ("`nReproduce the problem then press Enter to stop the trace")
+    StartDataCollectorSet
+
+    Write-Host "`nTrace started" -ForegroundColor Green
+    Write-Host -NoNewLine "`nReproduce the problem then press Enter to stop the trace" -ForegroundColor Yellow
+    Read-Host
+     
     StopDataCollectorSet
+
     if ($IsProcMon)
     {
 
         StopProcMon
 
     }
+
+    GetSingleAppKioskConfiguration
+    GetRegistryKeys
 
     Write-Host "Logs saved at" $LogPath -ForegroundColor Green
 
