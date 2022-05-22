@@ -5,10 +5,10 @@ Powershell script for collecting AssignedAccess traces (+ProcMon)
 
 1) Open powershell as administrator
 2) Run the script
-- To collect only etw provider trace:
+- To collect only etw provider trace and registry keys:
 
 		.\KioskTrace.ps1              
-- To collect etw provider trace + ProcMon [ProcMon will be automatically downloaded, started and removed upon completion]:
+- To collect etw provider trace, registry keys + ProcMon [ProcMon will be automatically downloaded, started and removed upon completion]:
 
 		.\KioskTrace.ps1 -ProcMon
     
