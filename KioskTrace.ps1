@@ -1,5 +1,23 @@
 $LogPath   = [Environment]::GetFolderPath("Desktop") + "\KioskLogs"
-$IsProcMon = if ($args -and ($args[0].ToString().ToLower() -Match "procmon")) {$TRUE} else {$FALSE}
+
+
+ForEach ($arg in $args)
+{
+
+    if ($arg -match "procmon")
+    {
+
+        $IsProcMon = $TRUE
+
+    }
+    elseif ($arg -match "eventlog")
+    {
+
+        $IsEventLog = $TRUE
+
+    }
+
+}
 
 
 $AssignedAccessProviders = @(
@@ -54,7 +72,7 @@ Function CreateLogFolder
     {
 
         Write-Host "`nFound existing folder `"$LogPath`". Clearing contents." -ForegroundColor DarkCyan
-        Get-ChildItem -Path $LogPath | ForEach { $_.Delete() }
+        Remove-Item ($LogPath + "\*") -Recurse
 
     }
 
@@ -154,6 +172,14 @@ Function GetRegistryKeys
 
 }
 
+Function GetEventLogs
+{
+
+    $EventLogPath = $env:SystemRoot + "\System32\winevt\Logs"
+    Copy-Item $EventLogPath -Destination $LogPath -Recurse
+
+}
+
 
 Function Main
 {
@@ -179,15 +205,12 @@ Function Main
      
     StopDataCollectorSet
 
-    if ($IsProcMon)
-    {
-
-        StopProcMon
-
-    }
+    if ($IsProcMon)  { StopProcMon }
+    if ($IsEventLog) { GetEventLogs }
 
     GetSingleAppKioskConfiguration
     GetRegistryKeys
+    Get-AppxPackage -AllUsers >> ($LogPath + "\AppxAllUsers.txt")
 
     Write-Host "Logs saved at" $LogPath -ForegroundColor Green
 
