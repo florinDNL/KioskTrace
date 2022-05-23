@@ -1,5 +1,5 @@
 # KioskTrace
-Powershell script for collecting AssignedAccess traces (+ProcMon)
+Powershell script for collecting AssignedAccess traces
 
 # Usage
 
