@@ -165,8 +165,19 @@ Function GetRegistryKeys
     ForEach ($Key in $RegistryKeys.Keys)
     {
         
-        Get-ItemProperty -Path $Key >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
-        Get-ChildItem -Path $Key -Recurse >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
+        if (Test-Path $Key)
+        {
+
+            Get-ItemProperty -Path $Key >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
+            Get-ChildItem -Path $Key -Recurse >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
+            
+        }
+        else
+        {
+
+            "Key doesn't exist" >> ($LogPath + "\REG_" + $RegistryKeys.$Key + ".txt")
+
+        }
 
     }
 
