@@ -83,6 +83,7 @@ Function DownloadProcMon
 {
 
     $URL = "https://download.sysinternals.com/files/ProcessMonitor.zip"
+    Write-Host "`nDownloading and starting ProcMon" -ForegroundColor Cyan
     Invoke-WebRequest -Uri $URL -OutFile ($LogPath + "\ProcessMonitor.zip")
     Expand-Archive -Path ($LogPath + "\ProcessMonitor.zip") -DestinationPath $LogPath
     
@@ -94,6 +95,7 @@ Function StartProcMon
 
     $BackingFile = $LogPath + "\kiosklog.pml"
     start-process -filepath ($LogPath + "\procmon.exe") -argumentlist "/accepteula /quiet /minimized /backingfile `"$BackingFile`"" -Passthru | Out-Null
+    Write-Host "`nProcMon started" -ForegroundColor DarkCyan
 
 }
 
@@ -125,6 +127,8 @@ Function StartDataCollectorSet
         logman update trace $TraceName -p "$Provider" 0xffffffffffffffff 0xff -ets | Out-Null
 
     }
+
+     Write-Host "`nTrace started" -ForegroundColor Green
 
 }
 
@@ -201,17 +205,14 @@ Function Main
 
     if ($IsProcMon)
     {
-
-        Write-Host "`nDownloading and starting ProcMon" -ForegroundColor Cyan
+        
         DownloadProcMon
-        StartProcMon 
-        Write-Host "`nProcMon started" -ForegroundColor DarkCyan
+        StartProcMon         
 
     }
 
     StartDataCollectorSet
-
-    Write-Host "`nTrace started" -ForegroundColor Green
+   
     Write-Host -NoNewLine "`nReproduce the problem then press Enter to stop the trace" -ForegroundColor Yellow
     Read-Host
      
